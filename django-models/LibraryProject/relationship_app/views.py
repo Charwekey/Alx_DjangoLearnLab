@@ -5,13 +5,14 @@ from .models import Book, Library
 # Function-based view to list all books
 def list_books(request):
     books = Book.objects.all()
-    return render(request, 'list_books.html', {'books': books})
+    return render(request, 'relationship_app/list_books.html', {'books': books})
+
 
 
 # Class-based view to show details of a specific library
-class LibraryDetailView(View):
-    template_name = 'library_detail.html'
+from django.views.generic.detail import DetailView
 
-    def get(self, request, pk):
-        library = get_object_or_404(Library, pk=pk)
-        return render(request, self.template_name, {'library': library})
+class LibraryDetailView(DetailView):
+    model = Library
+    template_name = 'relationship_app/library_detail.html'
+    context_object_name = 'library'
