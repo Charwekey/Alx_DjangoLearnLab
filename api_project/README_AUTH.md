@@ -18,11 +18,11 @@ How to call protected endpoints
 
 Include the token in the `Authorization` header:
 
-  Authorization: Token <your-token>
+Authorization: Token <your-token>
 
 Example curl (replace <token> with actual token):
 
-  curl -H "Authorization: Token <token>" http://127.0.0.1:8000/api/books/
+curl -H "Authorization: Token <token>" http://127.0.0.1:8000/api/books/
 
 Notes
 
