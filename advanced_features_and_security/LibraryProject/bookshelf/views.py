@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Book
 from django.db.models import Q
-from .forms import SearchForm, BookForm
+from .forms import SearchForm, BookForm, ExampleForm
 from django.contrib.auth.decorators import permission_required
 
 
