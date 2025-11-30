@@ -550,12 +550,12 @@ class BookFilteringTests(BookAPITestCase):
         self.assertEqual(len(response.data), 0)
     
     def test_filter_by_nonexistent_author(self):
-        """Test filtering by non-existent author returns empty list."""
+        """Test filtering by non-existent author returns 400 Bad Request (validation error)."""
         url = reverse('api:book-list')
         response = self.client.get(url, {'author': 99999})
         
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 0)
+        # django-filter validates that the choice exists, so it returns 400
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class BookSearchingTests(BookAPITestCase):
