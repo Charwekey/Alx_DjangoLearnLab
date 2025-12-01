@@ -256,7 +256,7 @@ class BookCreateViewTests(BookAPITestCase):
     def test_create_book_authenticated(self):
         """Test that authenticated users can create books."""
         self.authenticate()
-        url = reverse('api:book-create')
+        url = reverse('api:book-list')
         data = {
             'title': 'New Test Book',
             'publication_year': 2020,
@@ -272,7 +272,7 @@ class BookCreateViewTests(BookAPITestCase):
     
     def test_create_book_unauthenticated(self):
         """Test that unauthenticated users cannot create books."""
-        url = reverse('api:book-create')
+        url = reverse('api:book-list')
         data = {
             'title': 'Unauthorized Book',
             'publication_year': 2020,
@@ -287,7 +287,7 @@ class BookCreateViewTests(BookAPITestCase):
     def test_create_book_missing_title(self):
         """Test creating a book without a title fails."""
         self.authenticate()
-        url = reverse('api:book-create')
+        url = reverse('api:book-list')
         data = {
             'publication_year': 2020,
             'author': self.author1.pk
@@ -301,7 +301,7 @@ class BookCreateViewTests(BookAPITestCase):
     def test_create_book_missing_publication_year(self):
         """Test creating a book without publication year fails."""
         self.authenticate()
-        url = reverse('api:book-create')
+        url = reverse('api:book-list')
         data = {
             'title': 'Test Book',
             'author': self.author1.pk
@@ -315,7 +315,7 @@ class BookCreateViewTests(BookAPITestCase):
     def test_create_book_missing_author(self):
         """Test creating a book without an author fails."""
         self.authenticate()
-        url = reverse('api:book-create')
+        url = reverse('api:book-list')
         data = {
             'title': 'Test Book',
             'publication_year': 2020
@@ -329,7 +329,7 @@ class BookCreateViewTests(BookAPITestCase):
     def test_create_book_invalid_author(self):
         """Test creating a book with non-existent author fails."""
         self.authenticate()
-        url = reverse('api:book-create')
+        url = reverse('api:book-list')
         data = {
             'title': 'Test Book',
             'publication_year': 2020,
@@ -344,7 +344,7 @@ class BookCreateViewTests(BookAPITestCase):
     def test_create_book_current_year(self):
         """Test creating a book with current year is allowed."""
         self.authenticate()
-        url = reverse('api:book-create')
+        url = reverse('api:book-list')
         current_year = datetime.now().year
         data = {
             'title': 'Current Year Book',
@@ -360,7 +360,7 @@ class BookCreateViewTests(BookAPITestCase):
 
 class BookUpdateViewTests(BookAPITestCase):
     """
-    Tests for the Book Update endpoint (PUT/PATCH /api/books/<id>/update/).
+    Tests for the Book Update endpoint (PUT/PATCH /api/books/<id>/).
     
     This endpoint should:
     - Allow authenticated users to update books
@@ -371,7 +371,7 @@ class BookUpdateViewTests(BookAPITestCase):
     def test_update_book_authenticated_put(self):
         """Test that authenticated users can fully update books with PUT."""
         self.authenticate()
-        url = reverse('api:book-update', kwargs={'pk': self.book1.pk})
+        url = reverse('api:book-detail', kwargs={'pk': self.book1.pk})
         data = {
             'title': 'Updated Title',
             'publication_year': 1999,
@@ -389,7 +389,7 @@ class BookUpdateViewTests(BookAPITestCase):
     def test_update_book_authenticated_patch(self):
         """Test that authenticated users can partially update books with PATCH."""
         self.authenticate()
-        url = reverse('api:book-update', kwargs={'pk': self.book1.pk})
+        url = reverse('api:book-detail', kwargs={'pk': self.book1.pk})
         data = {
             'title': 'Partially Updated Title'
         }
@@ -405,7 +405,7 @@ class BookUpdateViewTests(BookAPITestCase):
     
     def test_update_book_unauthenticated(self):
         """Test that unauthenticated users cannot update books."""
-        url = reverse('api:book-update', kwargs={'pk': self.book1.pk})
+        url = reverse('api:book-detail', kwargs={'pk': self.book1.pk})
         data = {
             'title': 'Unauthorized Update'
         }
@@ -420,7 +420,7 @@ class BookUpdateViewTests(BookAPITestCase):
     def test_update_nonexistent_book(self):
         """Test updating a non-existent book returns 404."""
         self.authenticate()
-        url = reverse('api:book-update', kwargs={'pk': 99999})
+        url = reverse('api:book-detail', kwargs={'pk': 99999})
         data = {
             'title': 'Updated Title'
         }
@@ -432,7 +432,7 @@ class BookUpdateViewTests(BookAPITestCase):
     def test_update_book_multiple_fields(self):
         """Test updating multiple fields at once."""
         self.authenticate()
-        url = reverse('api:book-update', kwargs={'pk': self.book1.pk})
+        url = reverse('api:book-detail', kwargs={'pk': self.book1.pk})
         data = {
             'title': 'New Title',
             'publication_year': 2000
@@ -448,7 +448,7 @@ class BookUpdateViewTests(BookAPITestCase):
 
 class BookDeleteViewTests(BookAPITestCase):
     """
-    Tests for the Book Delete endpoint (DELETE /api/books/<id>/delete/).
+    Tests for the Book Delete endpoint (DELETE /api/books/<id>/).
     
     This endpoint should:
     - Allow authenticated users to delete books
@@ -459,7 +459,7 @@ class BookDeleteViewTests(BookAPITestCase):
     def test_delete_book_authenticated(self):
         """Test that authenticated users can delete books."""
         self.authenticate()
-        url = reverse('api:book-delete', kwargs={'pk': self.book1.pk})
+        url = reverse('api:book-detail', kwargs={'pk': self.book1.pk})
         
         response = self.client.delete(url)
         
@@ -469,7 +469,7 @@ class BookDeleteViewTests(BookAPITestCase):
     
     def test_delete_book_unauthenticated(self):
         """Test that unauthenticated users cannot delete books."""
-        url = reverse('api:book-delete', kwargs={'pk': self.book1.pk})
+        url = reverse('api:book-detail', kwargs={'pk': self.book1.pk})
         
         response = self.client.delete(url)
         
@@ -480,7 +480,7 @@ class BookDeleteViewTests(BookAPITestCase):
     def test_delete_nonexistent_book(self):
         """Test deleting a non-existent book returns 404."""
         self.authenticate()
-        url = reverse('api:book-delete', kwargs={'pk': 99999})
+        url = reverse('api:book-detail', kwargs={'pk': 99999})
         
         response = self.client.delete(url)
         
@@ -489,7 +489,7 @@ class BookDeleteViewTests(BookAPITestCase):
     def test_delete_book_twice(self):
         """Test that deleting the same book twice returns 404 on second attempt."""
         self.authenticate()
-        url = reverse('api:book-delete', kwargs={'pk': self.book1.pk})
+        url = reverse('api:book-detail', kwargs={'pk': self.book1.pk})
         
         # First deletion should succeed
         response1 = self.client.delete(url)
@@ -692,7 +692,7 @@ class BookPermissionTests(BookAPITestCase):
     
     def test_create_view_requires_authentication(self):
         """Test that create view requires authentication."""
-        url = reverse('api:book-create')
+        url = reverse('api:book-list')
         data = {
             'title': 'Test Book',
             'publication_year': 2020,
@@ -705,7 +705,7 @@ class BookPermissionTests(BookAPITestCase):
     
     def test_update_view_requires_authentication(self):
         """Test that update view requires authentication."""
-        url = reverse('api:book-update', kwargs={'pk': self.book1.pk})
+        url = reverse('api:book-detail', kwargs={'pk': self.book1.pk})
         data = {'title': 'Updated Title'}
         
         response = self.client.patch(url, data, format='json')
@@ -714,7 +714,7 @@ class BookPermissionTests(BookAPITestCase):
     
     def test_delete_view_requires_authentication(self):
         """Test that delete view requires authentication."""
-        url = reverse('api:book-delete', kwargs={'pk': self.book1.pk})
+        url = reverse('api:book-detail', kwargs={'pk': self.book1.pk})
         
         response = self.client.delete(url)
         
@@ -723,7 +723,7 @@ class BookPermissionTests(BookAPITestCase):
     def test_authenticated_user_can_create(self):
         """Test that authenticated users can create books."""
         self.authenticate()
-        url = reverse('api:book-create')
+        url = reverse('api:book-list')
         data = {
             'title': 'Authenticated Book',
             'publication_year': 2020,
@@ -737,7 +737,7 @@ class BookPermissionTests(BookAPITestCase):
     def test_authenticated_user_can_update(self):
         """Test that authenticated users can update books."""
         self.authenticate()
-        url = reverse('api:book-update', kwargs={'pk': self.book1.pk})
+        url = reverse('api:book-detail', kwargs={'pk': self.book1.pk})
         data = {'title': 'Updated by Auth User'}
         
         response = self.client.patch(url, data, format='json')
@@ -747,7 +747,7 @@ class BookPermissionTests(BookAPITestCase):
     def test_authenticated_user_can_delete(self):
         """Test that authenticated users can delete books."""
         self.authenticate()
-        url = reverse('api:book-delete', kwargs={'pk': self.book1.pk})
+        url = reverse('api:book-detail', kwargs={'pk': self.book1.pk})
         
         response = self.client.delete(url)
         
@@ -767,7 +767,7 @@ class BookValidationTests(BookAPITestCase):
     def test_future_publication_year_rejected(self):
         """Test that books with future publication years are rejected."""
         self.authenticate()
-        url = reverse('api:book-create')
+        url = reverse('api:book-list')
         future_year = datetime.now().year + 10
         data = {
             'title': 'Future Book',
@@ -783,7 +783,7 @@ class BookValidationTests(BookAPITestCase):
     def test_current_year_accepted(self):
         """Test that books with current year are accepted."""
         self.authenticate()
-        url = reverse('api:book-create')
+        url = reverse('api:book-list')
         current_year = datetime.now().year
         data = {
             'title': 'Current Year Book',
@@ -798,7 +798,7 @@ class BookValidationTests(BookAPITestCase):
     def test_past_year_accepted(self):
         """Test that books with past years are accepted."""
         self.authenticate()
-        url = reverse('api:book-create')
+        url = reverse('api:book-list')
         data = {
             'title': 'Old Book',
             'publication_year': 1900,
@@ -812,7 +812,7 @@ class BookValidationTests(BookAPITestCase):
     def test_invalid_data_type_for_year(self):
         """Test that invalid data type for publication year is rejected."""
         self.authenticate()
-        url = reverse('api:book-create')
+        url = reverse('api:book-list')
         data = {
             'title': 'Test Book',
             'publication_year': 'not-a-number',
@@ -827,7 +827,7 @@ class BookValidationTests(BookAPITestCase):
     def test_empty_title_rejected(self):
         """Test that empty title is rejected."""
         self.authenticate()
-        url = reverse('api:book-create')
+        url = reverse('api:book-list')
         data = {
             'title': '',
             'publication_year': 2020,
@@ -842,7 +842,7 @@ class BookValidationTests(BookAPITestCase):
     def test_title_too_long_rejected(self):
         """Test that title exceeding max length is rejected."""
         self.authenticate()
-        url = reverse('api:book-create')
+        url = reverse('api:book-list')
         data = {
             'title': 'x' * 201,  # Max length is 200
             'publication_year': 2020,
@@ -857,7 +857,7 @@ class BookValidationTests(BookAPITestCase):
     def test_update_with_future_year_rejected(self):
         """Test that updating a book with future year is rejected."""
         self.authenticate()
-        url = reverse('api:book-update', kwargs={'pk': self.book1.pk})
+        url = reverse('api:book-detail', kwargs={'pk': self.book1.pk})
         future_year = datetime.now().year + 10
         data = {
             'publication_year': future_year
