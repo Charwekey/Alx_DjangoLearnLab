@@ -1,4 +1,5 @@
 {% extends 'blog/base.html' %}
+{% extends 'blog/base.html' %}
 
 {% block content %}
 <article>
@@ -8,6 +9,27 @@
     {% if object.author == user %}
     <a href="{% url 'post-update' object.pk %}">Edit</a>
     <a href="{% url 'post-delete' object.pk %}">Delete</a>
+    {% endif %}
+
+    <h3>Comments</h3>
+    {% for comment in post.comments.all %}
+    <div class="comment">
+        <p><strong>{{ comment.author }}</strong> said:</p>
+        <p>{{ comment.content }}</p>
+        <p><small>{{ comment.created_at }}</small></p>
+        {% if comment.author == user %}
+        <a href="{% url 'comment-update' comment.pk %}">Edit</a>
+        <a href="{% url 'comment-delete' comment.pk %}">Delete</a>
+        {% endif %}
+    </div>
+    {% empty %}
+    <p>No comments yet.</p>
+    {% endfor %}
+
+    {% if user.is_authenticated %}
+    <a href="{% url 'add-comment' post.pk %}">Add Comment</a>
+    {% else %}
+    <p><a href="{% url 'login' %}">Login</a> to add a comment.</p>
     {% endif %}
 </article>
 {% endblock %}
