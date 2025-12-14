@@ -69,3 +69,13 @@ Additional fields:
 -   **Detail**: `GET /api/comments/<id>/`
 -   **Update**: `PUT /api/comments/<id>/` (Owner only)
 -   **Delete**: `DELETE /api/comments/<id>/` (Owner only)
+
+### Follows
+
+-   **Follow User**: `POST /accounts/follow/<user_id>/`
+-   **Unfollow User**: `POST /accounts/unfollow/<user_id>/`
+
+### Feed
+
+-   **Get Feed**: `GET /api/feed/`
+    -   Returns posts from followed users, ordered by newest first.
