@@ -16,7 +16,6 @@ Permissions:
     - Read operations (List, Retrieve): Open to all users (authenticated or not)
     - Write operations (Create, Update, Delete): Restricted to authenticated users only
 """
-
 from rest_framework import generics, permissions, filters
 from rest_framework.response import Response
 from rest_framework import status

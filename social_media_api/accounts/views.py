@@ -1,31 +1,24 @@
-from rest_framework import generics, permissions, status
+from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
-from .serializers import RegisterSerializer, UserSerializer
-from .models import CustomUser
+from rest_framework.views import APIView
+from .serializers import UserSerializer, RegisterSerializer
+from django.contrib.auth import get_user_model
 
-class RegisterView(generics.CreateAPIView):
-    """
-    View for user registration. Returns a token upon successful registration.
-    """
-    serializer_class = RegisterSerializer
-    permission_classes = [permissions.AllowAny]
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        token = Token.objects.get(user=user)
-        return Response({
-            'token': token.key,
-            'user': UserSerializer(user).data
-        }, status=status.HTTP_201_CREATED)
+class RegisterView(APIView):
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({
+                'token': token.key,
+                'user': UserSerializer(user).data
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(ObtainAuthToken):
-    """
-    Custom Login view to return user details along with token.
-    """
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data,
                                            context={'request': request})
@@ -34,15 +27,19 @@ class LoginView(ObtainAuthToken):
         token, created = Token.objects.get_or_create(user=user)
         return Response({
             'token': token.key,
-            'user': UserSerializer(user).data
+            'user_id': user.pk,
+            'email': user.email
         })
 
 class ProfileView(generics.RetrieveUpdateAPIView):
-    """
-    View to retrieve and update the authenticated user's profile.
-    """
+    # Only authenticated users can access this view
+    # But for now assume basic setup, permissions handled in urls or globally
+    # Better to add permission_classes here
+    from rest_framework.permissions import IsAuthenticated
+    permission_classes = [IsAuthenticated]
+    
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
+        # Return the currently logged-in user
         return self.request.user
