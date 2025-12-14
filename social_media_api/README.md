@@ -79,3 +79,13 @@ Additional fields:
 
 -   **Get Feed**: `GET /api/feed/`
     -   Returns posts from followed users, ordered by newest first.
+
+### Likes
+
+-   **Like Post**: `POST /api/posts/<post_id>/like/`
+-   **Unlike Post**: `POST /api/posts/<post_id>/unlike/`
+
+### Notifications
+
+-   **List Notifications**: `GET /api/notifications/`
+    -   Returns unread notifications (e.g., likes).
