@@ -96,6 +96,9 @@ DATABASES = {
         default='sqlite:///' + str(BASE_DIR / 'db.sqlite3')
     )
 }
+# Ensure PORT is configured if using external database
+if 'PORT' not in DATABASES['default']:
+    DATABASES['default']['PORT'] = os.environ.get('PORT', '5432')
 
 
 # Password validation
