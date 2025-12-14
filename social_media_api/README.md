@@ -50,3 +50,22 @@ Additional fields:
 -   **Profile**: `GET /accounts/profile/`
     -   Headers: `Authorization: Token <your_token>`
     -   Response: User details.
+
+### Posts
+
+-   **List**: `GET /api/posts/`
+-   **Create**: `POST /api/posts/`
+    -   Payload: `{"title": "My Post", "content": "Content..."}`
+-   **Detail**: `GET /api/posts/<id>/`
+-   **Update**: `PUT /api/posts/<id>/` (Owner only)
+-   **Delete**: `DELETE /api/posts/<id>/` (Owner only)
+-   **Search**: `GET /api/posts/?search=<query>`
+
+### Comments
+
+-   **List**: `GET /api/comments/`
+-   **Create**: `POST /api/comments/`
+    -   Payload: `{"post": <post_id>, "content": "My Comment"}`
+-   **Detail**: `GET /api/comments/<id>/`
+-   **Update**: `PUT /api/comments/<id>/` (Owner only)
+-   **Delete**: `DELETE /api/comments/<id>/` (Owner only)

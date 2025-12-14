@@ -7,57 +7,86 @@ django.setup()
 
 from rest_framework.test import APIClient
 from django.contrib.auth import get_user_model
+from posts.models import Post, Comment
+
+User = get_user_model()
 
 def run_verification():
     client = APIClient()
     
-    # 1. Register
-    print("Testing Registration...")
-    reg_data = {
-        'username': 'testuser_verify_2',
-        'password': 'password123',
-        'email': 'verify2@example.com',
-        'bio': 'Verification bio'
-    }
-    response = client.post('/accounts/register/', reg_data)
-    print(f"Register Status: {response.status_code}")
+    print("--- Setup Users ---")
+    user1_data = {'username': 'user_a', 'password': 'password123', 'email': 'a@example.com'}
+    user2_data = {'username': 'user_b', 'password': 'password123', 'email': 'b@example.com'}
     
-    token = None
+    # Create or Get User 1
+    response = client.post('/accounts/register/', user1_data)
     if response.status_code == 201:
-        print("Registration Successful")
-        token = response.data.get('token')
+        token1 = response.data['token']
+        print("User A Registered")
     else:
-        print(f"Registration Failed: {response.data}")
-        # If user exists from previous run, try login
-        if "username" in response.data and "already exists" in str(response.data["username"]):
-             print("User already exists, proceeding to login...")
+        # Login if exists
+        response = client.post('/accounts/login/', user1_data)
+        token1 = response.data['token']
+        print("User A Logged In")
 
-    # 2. Login
-    print("\nTesting Login...")
-    login_data = {
-        'username': 'testuser_verify_2',
-        'password': 'password123'
-    }
-    response = client.post('/accounts/login/', login_data)
-    print(f"Login Status: {response.status_code}")
-    if response.status_code == 200:
-        print("Login Successful")
-        token = response.data.get('token')
+    # Create or Get User 2
+    response = client.post('/accounts/register/', user2_data)
+    if response.status_code == 201:
+        token2 = response.data['token']
+        print("User B Registered")
     else:
-        print(f"Login Failed: {response.data}")
+        response = client.post('/accounts/login/', user2_data)
+        token2 = response.data['token']
+        print("User B Logged In")
 
-    # 3. Profile
-    if token:
-        print("\nTesting Profile...")
-        client.credentials(HTTP_AUTHORIZATION='Token ' + token)
-        response = client.get('/accounts/profile/')
-        print(f"Profile Status: {response.status_code}")
-        if response.status_code == 200:
-            print(f"Profile Data: {response.data}")
-        else:
-            print(f"Profile Failed: {response.data}")
+    print("\n--- Testing Posts ---")
+    # User A Creates Post
+    client.credentials(HTTP_AUTHORIZATION='Token ' + token1)
+    post_data = {'title': 'User A First Post', 'content': 'This is the content of the post.'}
+    response = client.post('/api/posts/', post_data)
+    print(f"Create Post (User A): {response.status_code}")
+    if response.status_code == 201:
+        post_id = response.data['id']
     else:
-        print("\nSkipping Profile test (No token)")
+        print(f"Failed to create post: {response.data}")
+        return
+
+    # User B Reads Post
+    client.credentials(HTTP_AUTHORIZATION='Token ' + token2)
+    response = client.get(f'/api/posts/{post_id}/')
+    print(f"Read Post (User B): {response.status_code}")
+    
+    # User B Comments on Post
+    comment_data = {'post': post_id, 'content': 'Nice post!'}
+    response = client.post('/api/comments/', comment_data)
+    print(f"Create Comment (User B): {response.status_code}")
+    if response.status_code == 201:
+        comment_id = response.data['id']
+    
+    # User B tries to Edit Post A (Should Fail)
+    edit_data = {'title': 'Hacked Post', 'content': 'Changed content'}
+    response = client.put(f'/api/posts/{post_id}/', edit_data)
+    print(f"Edit Post A by User B (Should be 403): {response.status_code}")
+
+    # User A Edits own Post (Should Succeed)
+    client.credentials(HTTP_AUTHORIZATION='Token ' + token1)
+    response = client.put(f'/api/posts/{post_id}/', edit_data)
+    print(f"Edit Post A by User A (Should be 200): {response.status_code}")
+    
+    # Filtering Test
+    print("\n--- Testing Search/Filtering ---")
+    response = client.get('/api/posts/?search=Hacked')
+    print(f"Search Results Count: {len(response.data.get('results', []))}")
+    
+    # Pagination Test
+    print("\n--- Testing Pagination ---")
+    # Create 11 more posts
+    for i in range(11):
+        client.post('/api/posts/', {'title': f'Post {i}', 'content': 'Content'})
+    
+    response = client.get('/api/posts/')
+    print(f"Pagination 'count': {response.data.get('count')}")
+    print(f"Pagination 'next': {response.data.get('next')}")
 
 if __name__ == '__main__':
     run_verification()
